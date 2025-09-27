@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,4 +48,24 @@ public class UserResource {
 		// convertida para JSON).
 		return ResponseEntity.ok().body(listDto);
 	}
+	
+	/**
+     * Endpoint para buscar um usuário por ID.
+     * Mapeado para requisições GET em /users/{id}.
+     * @param id O ID (String) passado na URL.
+     * @return ResponseEntity<UserDTO> com status 200 OK.
+     */
+    @GetMapping(value = "/{id}") // 🎯 Mapeia para um GET com uma variável 'id' na URL
+    public ResponseEntity<UserDTO> findById(@PathVariable String id) {
+        
+        // 1. Chama o método findById() na camada de Serviço.
+        // Retorna a Entidade User ou lança a exceção 404.
+        User obj = service.findById(id);
+        
+        // 2. Converte a Entidade User para o DTO.
+        UserDTO objDto = new UserDTO(obj);
+        
+        // 3. Retorna a resposta com o DTO e status 200 OK.
+        return ResponseEntity.ok().body(objDto);
+    }
 }
