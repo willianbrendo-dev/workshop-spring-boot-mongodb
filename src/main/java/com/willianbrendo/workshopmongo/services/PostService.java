@@ -106,4 +106,14 @@ public class PostService {
         entity.setBody(obj.getBody());
         entity.setAuthor(obj.getAuthor());
     }
+    
+    /**
+     * Busca posts contendo uma determinada string no título (case-insensitive).
+     * @param text A string a ser buscada no título.
+     * @return Uma lista de posts correspondentes.
+     */
+    public List<Post> findByTitle(String text) {
+        // A string de busca já é passada diretamente para o Query Method do Repositório.
+        return repository.findByTitleContainingIgnoreCase(text);
+    }
 }

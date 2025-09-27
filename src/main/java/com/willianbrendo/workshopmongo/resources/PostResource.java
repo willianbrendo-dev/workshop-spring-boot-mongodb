@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -125,6 +126,25 @@ public class PostResource {
         // Se você quisesse retornar o objeto atualizado (prática aceitável),
         // o retorno seria ResponseEntity<Post> e o status 200 OK.
         return ResponseEntity.noContent().build();
+    }
+    
+    /**
+     * Endpoint para buscar posts por uma string no título.
+     * Mapeado para GET /posts/titlesearch?text=seu_texto_aqui
+     * * @param text O parâmetro de busca de URL.
+     * @return ResponseEntity<List<Post>>: Lista de posts encontrados.
+     */
+    @GetMapping(value = "/titlesearch") 
+    public ResponseEntity<List<Post>> findByTitle(@RequestParam(value = "text", defaultValue = "") String text) {
+        
+        // Decodifica o texto que pode vir codificado em URL (ex: "bom dia" vira "bom%20dia")
+        // (Opcional, mas útil para sanitização de URLs)
+        // String decodedText = URL.decode(text, "UTF-8"); // Se tiver utilitário de URL
+
+        // Neste exemplo simples, vamos usar a string crua.
+        List<Post> list = service.findByTitle(text);
+        
+        return ResponseEntity.ok().body(list);
     }
 
 }
