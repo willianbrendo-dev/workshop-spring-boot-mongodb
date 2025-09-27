@@ -1,8 +1,13 @@
 package com.willianbrendo.workshopmongo.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
+import com.willianbrendo.workshopmongo.domain.Post;
 import com.willianbrendo.workshopmongo.domain.User;
 
 public class UserDTO implements Serializable{
@@ -12,6 +17,15 @@ public class UserDTO implements Serializable{
 	private String id; 
     private String name;
     private String email;
+    
+ // 🎯 NOVO RELACIONAMENTO REFERENCIADO: Lista de Posts
+    // @DBRef: Indica que esta é uma referência. O Spring só carrega esses posts 
+    //         quando você explicitamente pedir (lazy loading por padrão).
+    // mappedBy="author": Esta anotação, embora mais comum no JPA, é usada aqui por 
+    //                     convenção para indicar que o mapeamento é feito pelo lado do 'author' no Post.
+    @DBRef(lazy = true) // lazy = true é o padrão para @DBRef.
+    private List<Post> posts = new ArrayList<>(); // Inicializa a lista para evitar NullPointerException
+    
     
     public UserDTO() {
     }
@@ -49,6 +63,15 @@ public class UserDTO implements Serializable{
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+	
+
+	public List<Post> getPosts() {
+		return posts;
+	}
+
+	public void setPosts(List<Post> posts) {
+		this.posts = posts;
 	}
 
 	@Override
