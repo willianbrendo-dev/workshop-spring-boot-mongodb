@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -133,4 +134,31 @@ public class UserResource {
         // O .build() cria a resposta sem corpo.
         return ResponseEntity.noContent().build();
     }
+    
+    
+    /**
+     * Endpoint para atualizar um usuário existente.
+     * Mapeado para requisições PUT em /users/{id}.
+     * @param id O ID (String) do usuário a ser atualizado.
+     * @param objDto O DTO com os novos dados no corpo da requisição (JSON).
+     * @return ResponseEntity<Void> com status 204 No Content (sucesso sem corpo).
+     */
+    @PutMapping(value = "/{id}") // 🎯 Mapeia para PUT com a variável 'id' na URL
+    public ResponseEntity<Void> update(@RequestBody UserDTO objDto, @PathVariable String id) {
+        
+        // 1. Converte o DTO recebido para a Entidade User
+        User obj = fromDTO(objDto);
+        
+        // 2. Garante que a Entidade tenha o ID correto (vindo da URL)
+        obj.setId(id);
+        
+        // 3. Chama o método update do Service para buscar, atualizar e salvar
+        service.update(id, obj);
+        
+        // 4. Retorna o status 204 No Content para indicar sucesso sem corpo.
+        // Se você quisesse retornar o objeto atualizado (prática aceitável),
+        // o retorno seria ResponseEntity<UserDTO> e o status 200 OK.
+        return ResponseEntity.noContent().build();
+    }
+
 }

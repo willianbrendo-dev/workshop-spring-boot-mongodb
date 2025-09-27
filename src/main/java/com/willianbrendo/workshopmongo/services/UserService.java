@@ -74,4 +74,38 @@ public class UserService {
         // a exclusão de um documento pai não é automaticamente impedida pela FK,
         // então a lógica fica mais simples.
     }
+    
+    
+    /**
+     * Atualiza um usuário existente no banco de dados.
+     * @param id O ID (String) do usuário a ser atualizado.
+     * @param obj O objeto User com os novos dados.
+     * @return O objeto User atualizado.
+     */
+    public User update(String id, User obj) {
+        
+        // 1. Busca a Entidade existente. Se não encontrar, lança 404.
+        // Usamos o findById que já implementamos para garantir o tratamento 404.
+        User entity = findById(id); 
+        
+        // 2. Copia os dados do objeto 'obj' (que veio do Controller) para a 'entity' (que veio do banco)
+        updateData(entity, obj);
+        
+        // 3. O método save() do MongoRepository realiza o UPDATE quando o ID não é nulo.
+        return repository.save(entity);
+    }
+
+    /**
+     * Método auxiliar privado para copiar os dados relevantes do objeto de origem (obj) 
+     * para o objeto destino (entity), que está sendo monitorado.
+     */
+    private void updateData(User entity, User obj) {
+        // Atualizamos apenas os campos que o cliente enviou e queremos permitir a alteração
+        entity.setName(obj.getName());
+        entity.setEmail(obj.getEmail());
+        // Se você tiver phone e password na sua Entidade, inclua aqui. 
+        // Por exemplo:
+        // entity.setPhone(obj.getPhone());
+        // entity.setPassword(obj.getPassword()); // Cuidado com a senha!
+    }
 }
