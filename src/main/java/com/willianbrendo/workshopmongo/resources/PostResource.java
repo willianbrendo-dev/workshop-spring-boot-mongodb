@@ -1,7 +1,6 @@
 package com.willianbrendo.workshopmongo.resources;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,85 +15,69 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.willianbrendo.workshopmongo.domain.Post;
-import com.willianbrendo.workshopmongo.domain.User;
-import com.willianbrendo.workshopmongo.dto.UserDTO;
-import com.willianbrendo.workshopmongo.services.UserService;
+import com.willianbrendo.workshopmongo.services.PostService;
 
 @RestController // 🎯 Anotação que combina @Controller e @ResponseBody. Indica que a classe é um
 				// Controller REST.
-@RequestMapping(value = "/users") // 🎯 Anotação que define o caminho base (endpoint) para todos os métodos desta
-									// classe: http://localhost:8080/users
-public class UserResource {
+@RequestMapping(value = "/posts") 
+public class PostResource {
 
 	@Autowired // Injeção de dependência da camada de Serviço
-	private UserService service;
+	private PostService service;
 
 	/**
-	 * Endpoint para buscar todos os usuários. Mapeado para requisições GET em
-	 * /users. * @return ResponseEntity<List<User>>: Uma lista de usuários com
+	 * Endpoint para buscar todos os post. Mapeado para requisições GET em
+	 * /posts. * @return ResponseEntity<List<Post>>: Uma lista de post com
 	 * status HTTP 200 OK.
 	 */
 	@GetMapping // 🎯 Anotação que mapeia este método para o método HTTP GET no caminho base
 				// (/users)
-	public ResponseEntity<List<UserDTO>> findAll() {
+	public ResponseEntity<List<Post>> findAll() {
 
 		// 1. Chama o método findAll() na camada de Serviço (que acessa o
 		// Repositório/MongoDB)
-		List<User> list = service.findAll();
-
-		// 2. 🎯 Converte a lista de User (Entidade) para List de UserDTO
-		// - list.stream(): Cria um stream (fluxo de dados).
-		// - .map(x -> new UserDTO(x)): Mapeia cada User 'x' para um novo UserDTO.
-		// - .collect(Collectors.toList()): Coleta o resultado de volta em uma List.
-		List<UserDTO> listDto = list.stream().map(x -> new UserDTO(x)).collect(Collectors.toList());
+		List<Post> list = service.findAll();
 
 		// 2. Constrói a resposta HTTP:
 		// - ResponseEntity.ok(): Retorna a resposta com o status 200 OK.
 		// - .body(list): Define o corpo da resposta como a lista de usuários (que será
 		// convertida para JSON).
-		return ResponseEntity.ok().body(listDto);
+		return ResponseEntity.ok().body(list);
 	}
 	
 	/**
-     * Endpoint para buscar um usuário por ID.
-     * Mapeado para requisições GET em /users/{id}.
+     * Endpoint para buscar um post por ID.
+     * Mapeado para requisições GET em /posts/{id}.
      * @param id O ID (String) passado na URL.
-     * @return ResponseEntity<UserDTO> com status 200 OK.
+     * @return ResponseEntity<Post> com status 200 OK.
      */
     @GetMapping(value = "/{id}") // 🎯 Mapeia para um GET com uma variável 'id' na URL
-    public ResponseEntity<UserDTO> findById(@PathVariable String id) {
+    public ResponseEntity<Post> findById(@PathVariable String id) {
         
         // 1. Chama o método findById() na camada de Serviço.
         // Retorna a Entidade User ou lança a exceção 404.
-        User obj = service.findById(id);
-        
-        // 2. Converte a Entidade User para o DTO.
-        UserDTO objDto = new UserDTO(obj);
+        Post obj = service.findById(id);
         
         // 3. Retorna a resposta com o DTO e status 200 OK.
-        return ResponseEntity.ok().body(objDto);
+        return ResponseEntity.ok().body(obj);
     }
     
     
     /**
-     * Endpoint para inserir um novo usuário.
-     * Mapeado para requisições POST em /users.
-     * @param objDto O DTO com os dados do novo usuário, recebido no corpo da requisição (JSON).
+     * Endpoint para inserir um novo post.
+     * Mapeado para requisições POST em /posts.
      * @return ResponseEntity<Void> com status 201 Created e o cabeçalho 'Location'.
      */
-    @PostMapping // 🎯 Mapeia para requisições HTTP POST no caminho base (/users)
-    public ResponseEntity<Void> insert(@RequestBody UserDTO objDto) {
-        
-        // 1. Converte o DTO (recebido do cliente) para a Entidade User (que será salva)
-        User obj = fromDTO(objDto);
+    @PostMapping // 🎯 Mapeia para requisições HTTP POST no caminho base (/posts)
+    public ResponseEntity<Void> insert(@RequestBody Post obj) {
         
         // 2. Chama o Service para salvar a entidade no banco. O objeto retornado agora tem o ID.
         obj = service.insert(obj);
         
-        // 3. Constrói a URI do novo recurso criado (Ex: /users/65b0586e3f1979b007068d17)
+        // 3. Constrói a URI do novo recurso criado (Ex: /posts/65b0586e3f1979b007068d17)
         // Isso é uma boa prática REST: retornar o endereço de onde o novo recurso pode ser acessado.
         java.net.URI uri = ServletUriComponentsBuilder
-                .fromCurrentRequest()     // Pega a URI atual (http://localhost:8080/users)
+                .fromCurrentRequest()     // Pega a URI atual (http://localhost:8080/posts)
                 .path("/{id}")            // Adiciona o caminho com o ID
                 .buildAndExpand(obj.getId()) // Coloca o ID gerado no caminho
                 .toUri();                 // Converte para o objeto URI
@@ -103,24 +86,11 @@ public class UserResource {
         // - Status 201 (Created)
         // - Cabeçalho Location: A URI do novo recurso. O corpo (body) é vazio (Void).
         return ResponseEntity.created(uri).build();
-    }
-
-    /**
-     * Método auxiliar para converter UserDTO para a Entidade User.
-     * @param objDto O DTO a ser convertido.
-     * @return A entidade User pronta para persistência.
-     */
-    public User fromDTO(UserDTO objDto) {
-        // Criamos uma nova Entidade, usando o ID do DTO (que pode ser nulo no INSERT)
-        // e os demais dados. A senha e telefone são setados como nulos aqui, mas você
-        // pode ajustar o DTO para incluir o mínimo necessário para a criação.
-        return new User(objDto.getId(), objDto.getName(), objDto.getEmail());
-    }
-    
+    }   
     
     /**
      * Endpoint para deletar um usuário por ID.
-     * Mapeado para requisições DELETE em /users/{id}.
+     * Mapeado para requisições DELETE em /posts/{id}.
      * @param id O ID (String) passado na URL.
      * @return ResponseEntity<Void> com status 204 No Content (sucesso sem corpo).
      */
@@ -139,17 +109,12 @@ public class UserResource {
     
     /**
      * Endpoint para atualizar um usuário existente.
-     * Mapeado para requisições PUT em /users/{id}.
-     * @param id O ID (String) do usuário a ser atualizado.
-     * @param objDto O DTO com os novos dados no corpo da requisição (JSON).
+     * Mapeado para requisições PUT em /posts/{id}.
+     * @param id O ID (String) do post a ser atualizado.
      * @return ResponseEntity<Void> com status 204 No Content (sucesso sem corpo).
      */
     @PutMapping(value = "/{id}") // 🎯 Mapeia para PUT com a variável 'id' na URL
-    public ResponseEntity<Void> update(@RequestBody UserDTO objDto, @PathVariable String id) {
-        
-        // 1. Converte o DTO recebido para a Entidade User
-        User obj = fromDTO(objDto);
-        
+    public ResponseEntity<Void> update(@RequestBody Post obj, @PathVariable String id) {
         // 2. Garante que a Entidade tenha o ID correto (vindo da URL)
         obj.setId(id);
         
@@ -158,24 +123,8 @@ public class UserResource {
         
         // 4. Retorna o status 204 No Content para indicar sucesso sem corpo.
         // Se você quisesse retornar o objeto atualizado (prática aceitável),
-        // o retorno seria ResponseEntity<UserDTO> e o status 200 OK.
+        // o retorno seria ResponseEntity<Post> e o status 200 OK.
         return ResponseEntity.noContent().build();
-    }
-    
-    /**
-     * Endpoint para buscar todos os posts de um usuário específico.
-     * Mapeado para requisições GET em /users/{id}/posts.
-     * @param id O ID (String) do usuário.
-     * @return ResponseEntity<List<Post>>: A lista de posts do usuário.
-     */
-    @GetMapping(value = "/{id}/posts") 
-    public ResponseEntity<List<Post>> findPosts(@PathVariable String id) {
-        
-        // 1. Busca o usuário (já com a lista de Posts preenchida pela anotação @DBRef)
-        User obj = service.findById(id); // Reutilizamos o findById que já lida com o 404
-        
-        // 2. Retorna a lista de posts diretamente do objeto User.
-        return ResponseEntity.ok().body(obj.getPosts());
     }
 
 }
