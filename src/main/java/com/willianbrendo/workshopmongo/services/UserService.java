@@ -54,4 +54,24 @@ public class UserService {
         // 2. O método save() do MongoRepository realiza o INSERT quando o ID é nulo.
         return repository.save(obj);
     }
+    
+    /**
+     * Deleta um usuário pelo ID, verificando primeiro se ele existe.
+     * @param id O ID (String) do usuário a ser deletado.
+     */
+    public void delete(String id) {
+        
+        // 1. Garante o tratamento de erro 404: 
+        // Usamos o findById para verificar a existência. Se não encontrar,
+        // o findById lança a ResourceNotFoundException.
+        findById(id); 
+        
+        // 2. Se o findById não lançou exceção, o recurso existe e pode ser deletado.
+        repository.deleteById(id);
+        
+        // NOTA: Em bancos de dados relacionais, aqui seria o ponto para tratar 
+        // a DataIntegrityViolationException (erro 400), mas no MongoDB NoSQL puro,
+        // a exclusão de um documento pai não é automaticamente impedida pela FK,
+        // então a lógica fica mais simples.
+    }
 }

@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -112,5 +113,24 @@ public class UserResource {
         // e os demais dados. A senha e telefone são setados como nulos aqui, mas você
         // pode ajustar o DTO para incluir o mínimo necessário para a criação.
         return new User(objDto.getId(), objDto.getName(), objDto.getEmail());
+    }
+    
+    
+    /**
+     * Endpoint para deletar um usuário por ID.
+     * Mapeado para requisições DELETE em /users/{id}.
+     * @param id O ID (String) passado na URL.
+     * @return ResponseEntity<Void> com status 204 No Content (sucesso sem corpo).
+     */
+    @DeleteMapping(value = "/{id}") // 🎯 Mapeia para DELETE com a variável 'id' na URL
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        
+        // 1. Chama o método delete() na camada de Serviço.
+        // O tratamento 404 já está embutido na chamada do serviço.
+        service.delete(id);
+        
+        // 2. Retorna a resposta com o status 204 No Content. 
+        // O .build() cria a resposta sem corpo.
+        return ResponseEntity.noContent().build();
     }
 }
