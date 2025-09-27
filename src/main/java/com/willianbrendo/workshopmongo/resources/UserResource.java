@@ -7,8 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.willianbrendo.workshopmongo.domain.User;
 import com.willianbrendo.workshopmongo.dto.UserDTO;
@@ -67,5 +70,47 @@ public class UserResource {
         
         // 3. Retorna a resposta com o DTO e status 200 OK.
         return ResponseEntity.ok().body(objDto);
+    }
+    
+    
+    /**
+     * Endpoint para inserir um novo usuário.
+     * Mapeado para requisições POST em /users.
+     * @param objDto O DTO com os dados do novo usuário, recebido no corpo da requisição (JSON).
+     * @return ResponseEntity<Void> com status 201 Created e o cabeçalho 'Location'.
+     */
+    @PostMapping // 🎯 Mapeia para requisições HTTP POST no caminho base (/users)
+    public ResponseEntity<Void> insert(@RequestBody UserDTO objDto) {
+        
+        // 1. Converte o DTO (recebido do cliente) para a Entidade User (que será salva)
+        User obj = fromDTO(objDto);
+        
+        // 2. Chama o Service para salvar a entidade no banco. O objeto retornado agora tem o ID.
+        obj = service.insert(obj);
+        
+        // 3. Constrói a URI do novo recurso criado (Ex: /users/65b0586e3f1979b007068d17)
+        // Isso é uma boa prática REST: retornar o endereço de onde o novo recurso pode ser acessado.
+        java.net.URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequest()     // Pega a URI atual (http://localhost:8080/users)
+                .path("/{id}")            // Adiciona o caminho com o ID
+                .buildAndExpand(obj.getId()) // Coloca o ID gerado no caminho
+                .toUri();                 // Converte para o objeto URI
+        
+        // 4. Retorna a resposta:
+        // - Status 201 (Created)
+        // - Cabeçalho Location: A URI do novo recurso. O corpo (body) é vazio (Void).
+        return ResponseEntity.created(uri).build();
+    }
+
+    /**
+     * Método auxiliar para converter UserDTO para a Entidade User.
+     * @param objDto O DTO a ser convertido.
+     * @return A entidade User pronta para persistência.
+     */
+    public User fromDTO(UserDTO objDto) {
+        // Criamos uma nova Entidade, usando o ID do DTO (que pode ser nulo no INSERT)
+        // e os demais dados. A senha e telefone são setados como nulos aqui, mas você
+        // pode ajustar o DTO para incluir o mínimo necessário para a criação.
+        return new User(objDto.getId(), objDto.getName(), objDto.getEmail());
     }
 }

@@ -40,4 +40,18 @@ public class UserService {
         // Se contiver um User, retorna o objeto User.
         return obj.orElseThrow(() -> new ObjectNotFoundException(id));
     }
+    
+    /**
+     * Insere um novo usuário no banco de dados.
+     * @param obj O objeto User (Entidade) a ser salvo.
+     * @return O objeto User salvo, contendo o ID gerado pelo MongoDB.
+     */
+    public User insert(User obj) {
+        // 1. Antes de salvar, garantimos que o ID do objeto é nulo.
+        // O MongoDB irá gerar um novo ID.
+        obj.setId(null); 
+        
+        // 2. O método save() do MongoRepository realiza o INSERT quando o ID é nulo.
+        return repository.save(obj);
+    }
 }
