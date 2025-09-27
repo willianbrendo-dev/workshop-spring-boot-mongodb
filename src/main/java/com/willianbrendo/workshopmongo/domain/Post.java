@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.willianbrendo.workshopmongo.dto.AuthorDTO;
 import com.willianbrendo.workshopmongo.dto.UserDTO;
 
 @Document(collection = "posts") // Mapeia para a coleção "posts"
@@ -20,14 +21,13 @@ public class Post implements Serializable{
 	private String title;
 	private String body;
 	
-	// 🎯 Relacionamento de Documento Embutido (Embedded Document)
-    // O Spring Data irá persistir o UserDTO como um subdocumento dentro do Post
-    private UserDTO author; 
+	
+    private AuthorDTO author; 
     
     public Post() {
     }
 
-	public Post(String id, Instant date, String title, String body, UserDTO author) {
+	public Post(String id, Instant date, String title, String body, AuthorDTO author) {
 		this.id = id;
 		this.date = date;
 		this.title = title;
@@ -67,11 +67,11 @@ public class Post implements Serializable{
 		this.body = body;
 	}
 
-	public UserDTO getAuthor() {
+	public AuthorDTO getAuthor() {
 		return author;
 	}
 
-	public void setAuthor(UserDTO author) {
+	public void setAuthor(AuthorDTO author) {
 		this.author = author;
 	}
 
