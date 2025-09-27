@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.willianbrendo.workshopmongo.domain.Post;
 import com.willianbrendo.workshopmongo.domain.User;
 import com.willianbrendo.workshopmongo.dto.AuthorDTO;
+import com.willianbrendo.workshopmongo.dto.CommentDTO;
 import com.willianbrendo.workshopmongo.repositories.PostRepository;
 import com.willianbrendo.workshopmongo.repositories.UserRepository;
 
@@ -39,6 +40,9 @@ public class Instantiation implements CommandLineRunner {
 		Post post2 = new Post(null, Instant.now().minusSeconds(86400), // Ex: um dia atrás
 				"Bom dia!", "Acordei hoje feliz, cheio de energia!", new AuthorDTO(maria) // Autor: Embutindo o DTO do Alex
 		);
+		
+		CommentDTO comen1 = new CommentDTO("Boa viagem!!", Instant.now(), new AuthorDTO(joao));
+		post1.getComments().add(comen1);
 		
 		postRepository.saveAll(Arrays.asList(post1, post2));
 		
